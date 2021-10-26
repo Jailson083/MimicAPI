@@ -14,58 +14,59 @@ namespace MimicAPI.Controller
     [Route("api/[controller]")]
     public class PalavrasController : ControllerBase
     {
-        
-        [HttpGet("getAll")]    
-        public async Task<IActionResult> GetAll([FromServices]MimicContext context)
+        private new readonly MimicContext _context;
+
+        public PalavrasController(MimicContext context)
         {
-            var mimic = await context.Palavras
+            _context = context;
+        }
+
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            var mimic = await _context.Palavras
                 .AsNoTracking()
                 .ToListAsync();
 
-            return Ok(mimic);
+            return Ok(_context.Palavras);
 
         }
 
         [HttpGet("getList")]
-        public async Task<IActionResult> GetList([FromServices]MimicContext context, int id)
+        public async Task<IActionResult> GetList(int id)
         {
-            try
-            {
-                var mimic = await context.Palavras
-               .AsNoTracking()
-               .Where(p => p.Id.Equals(id))
-               .ToListAsync();
+            var mimic = await _context.Palavras
+           .AsNoTracking()
+           .Where(p => p.Id.Equals(id))
+           .ToListAsync();
 
-                return Ok(mimic);
-            }
-            catch (Exception)
-            {
+            if (mimic == null)
                 return BadRequest("Palavra não encontrada!");
-            }
-           
+
+            return Ok(mimic);
         }
 
         [HttpGet("getDetails")]
-        public async Task<IActionResult> GetDetails([FromServices]MimicContext context, int id)
+        public async Task<IActionResult> GetDetails(int id)
         {
             try
             {
-                var mimicDetails = await context.Palavras
+                var mimicDetails = await _context.Palavras
                .AsNoTracking()
                .Where(p => p.Id.Equals(id))
                .ToListAsync();
 
-                return Ok(mimicDetails);
+                return Ok(_context.Palavras);
             }
             catch (Exception)
             {
                 return BadRequest("Palavra não encontrada!");
             }
-           
+
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> PostAsync([FromServices]MimicContext context, [FromBody] PalavrasViewModel model)
+        public async Task<IActionResult> PostAsync(PalavrasViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -76,13 +77,13 @@ namespace MimicAPI.Controller
                 Active = model.Active,
                 CreatedOn = DateTime.Now,
                 Punctuation = model.Punctuation
-                
+
             };
 
             try
             {
-                context.Palavras.Add(palavras);
-                await context.SaveChangesAsync();
+                _context.Palavras.Add(palavras);
+                await _context.SaveChangesAsync();
 
                 return Ok(palavras);
 
@@ -95,12 +96,12 @@ namespace MimicAPI.Controller
         }
 
         [HttpPut("update/{id}")]
-        public async Task<IActionResult> UpdateAsync([FromServices]MimicContext context, [FromBody] PalavrasViewModel model, [FromRoute] int id)
+        public async Task<IActionResult> UpdateAsync(PalavrasViewModel model, int id)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
 
-            var mimicUpdate = await context.Palavras
+            var mimicUpdate = await _context.Palavras
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id.Equals(id));
 
@@ -114,8 +115,8 @@ namespace MimicAPI.Controller
 
             try
             {
-                context.Palavras.Update(mimicUpdate);
-                await context.SaveChangesAsync();
+                _context.Palavras.Update(mimicUpdate);
+                await _context.SaveChangesAsync();
 
                 return Ok(mimicUpdate);
             }
@@ -126,9 +127,9 @@ namespace MimicAPI.Controller
         }
 
         [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteAsync([FromServices]MimicContext context, [FromRoute] int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
-            var mimicDelete = await context.Palavras
+            var mimicDelete = await _context.Palavras
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id.Equals(id));
 
@@ -137,8 +138,8 @@ namespace MimicAPI.Controller
 
             try
             {
-                context.Palavras.Remove(mimicDelete);
-                await context.SaveChangesAsync();
+                _context.Palavras.Remove(mimicDelete);
+                await _context.SaveChangesAsync();
 
                 return Ok("Palavra excluída!");
 
