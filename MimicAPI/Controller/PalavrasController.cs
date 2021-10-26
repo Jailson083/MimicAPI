@@ -125,7 +125,7 @@ namespace MimicAPI.Controller
             }
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteAsync([FromServices]MimicContext context, [FromRoute] int id)
         {
             var mimicDelete = await context.Palavras
@@ -140,7 +140,7 @@ namespace MimicAPI.Controller
                 context.Palavras.Remove(mimicDelete);
                 await context.SaveChangesAsync();
 
-                return Ok("Palavra excluída");
+                return Ok("Palavra excluída!");
 
             }
             catch (Exception)
